@@ -2296,6 +2296,15 @@ namespace ForzaHorizon6AutoshowUnlocker
                 noWater.BackColor = AppBackground;
                 dialog.Controls.Add(noWater);
 
+                var natural = new CheckBox();
+                natural.Text = "Natural Mode (use the car's own speed/physics)";
+                natural.Checked = _autoRaceDriveNaturalMode;
+                natural.Location = new Point(18, 500);
+                natural.Size = new Size(524, 24);
+                natural.ForeColor = TextPrimary;
+                natural.BackColor = AppBackground;
+                dialog.Controls.Add(natural);
+
                 var save = MakeButton("Save", 446, 544, 96, 30);
                 MakeAccentButton(save, AccentBlue);
                 save.Click += delegate
@@ -2330,6 +2339,7 @@ namespace ForzaHorizon6AutoshowUnlocker
                     _autoRaceDriveScanIntervalMs = scan;
                     _autoRaceDriveOffWaypointMeters = offWaypoint;
                     _autoRaceDriveNoWaterDrag = noWater.Checked;
+                    _autoRaceDriveNaturalMode = natural.Checked;
 
                     _autoRaceDriveCruiseEnabled = cruiseRow.Key.Checked;
                     _autoRaceDriveTopSpeedEnabled = topRow.Key.Checked;

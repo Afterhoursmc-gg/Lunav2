@@ -674,6 +674,10 @@ namespace ForzaHorizon6AutoshowUnlocker
                     {
                         _autoRaceDriveNoWaterDrag = !string.Equals(value, "0", StringComparison.Ordinal);
                     }
+                    else if (string.Equals(key, "AutoRaceDriveNaturalMode", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _autoRaceDriveNaturalMode = !string.Equals(value, "0", StringComparison.Ordinal);
+                    }
                     else if (string.Equals(key, "AutoRaceDriveCruiseOn", StringComparison.OrdinalIgnoreCase))
                     {
                         _autoRaceDriveCruiseEnabled = !string.Equals(value, "0", StringComparison.Ordinal);
@@ -1104,6 +1108,7 @@ namespace ForzaHorizon6AutoshowUnlocker
                     "AutoRaceDriveScanMs=" + _autoRaceDriveScanIntervalMs.ToString(CultureInfo.InvariantCulture),
                     "AutoRaceDriveOffWaypoint=" + FormatFloat(_autoRaceDriveOffWaypointMeters),
                     "AutoRaceDriveNoWaterDrag=" + (_autoRaceDriveNoWaterDrag ? "1" : "0"),
+                    "AutoRaceDriveNaturalMode=" + (_autoRaceDriveNaturalMode ? "1" : "0"),
                     "AutoRaceDriveScanOn=" + (_autoRaceDriveScanEnabled ? "1" : "0"),
                     "AutoRaceDriveOffWaypointOn=" + (_autoRaceDriveOffWaypointEnabled ? "1" : "0"),
                     "AutoRaceDriveCruiseOn=" + (_autoRaceDriveCruiseEnabled ? "1" : "0"),

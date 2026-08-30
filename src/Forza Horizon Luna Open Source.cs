@@ -730,6 +730,7 @@ namespace ForzaHorizon6AutoshowUnlocker
         private bool _autoRaceDriveLandingStabilizerEnabled = true;
         private bool _autoRaceDriveAdaptiveBrakeEnabled = true;
         private bool _autoRaceDriveScanEnabled = true;
+        private bool _autoRaceDriveNaturalMode;
         private const int DefaultAutoRaceDriveCruiseKmh = 450;
         private const int DefaultAutoRaceDriveTopKmh = 612;
         private const int DefaultAutoRaceDriveAccel = 130;
@@ -8781,6 +8782,7 @@ namespace ForzaHorizon6AutoshowUnlocker
             db.AutoRaceDriveMaxSpeed = Math.Max(db.AutoRaceDriveCruiseSpeed, topKmh / 3.6F);
             db.AutoRaceDriveAccelPerSecond = Math.Max(1F, accel * accelMultiplier);
             db.AutoRaceDriveTurnRate = Math.Max(0.1F, steer);
+            db.AutoRaceDriveNaturalMode = _autoRaceDriveNaturalMode;
             db.AutoRaceDriveScanIntervalMs = _autoRaceDriveScanEnabled ? _autoRaceDriveScanIntervalMs : DefaultAutoRaceDriveScanMs;
             db.AutoRaceDriveOffWaypointMeters = _autoRaceDriveOffWaypointEnabled ? Math.Max(0F, _autoRaceDriveOffWaypointMeters) : 0F;
         }
@@ -27782,6 +27784,7 @@ namespace ForzaHorizon6AutoshowUnlocker
         internal float AutoRaceDriveAccelPerSecond = 130F;
         internal float AutoRaceDriveMaxSpeed = 170F;
         internal float AutoRaceDriveTurnRate = 4.6F;
+        internal bool AutoRaceDriveNaturalMode;
         internal float AutoRaceDriveOffWaypointMeters = 0F;
         internal int AutoRaceDriveScanIntervalMs = 50;
         internal int AutoRaceIntervalMs = TeleportCheckpointAutoIntervalDefaultMs;
@@ -36034,13 +36037,24 @@ namespace ForzaHorizon6AutoshowUnlocker
             desiredX /= desiredLen;
             desiredZ /= desiredLen;
 
-            var ramped = Math.Max(speed, AutoRaceDriveMinSpeed) + (AutoRaceDriveAccelPerSecond * (float)deltaSeconds);
-            var driveSpeed = Math.Min(ramped, AutoRaceDriveCruiseSpeed);
-            driveSpeed = Math.Max(driveSpeed, speed);
-            driveSpeed = Math.Min(driveSpeed, AutoRaceDriveMaxSpeed);
+            var driveSpeed = speed;
+            if (!AutoRaceDriveNaturalMode)
+            {
+                var ramped = Math.Max(speed, AutoRaceDriveMinSpeed) + (AutoRaceDriveAccelPerSecond * (float)deltaSeconds);
+                driveSpeed = Math.Min(ramped, AutoRaceDriveCruiseSpeed);
+                driveSpeed = Math.Max(driveSpeed, speed);
+                driveSpeed = Math.Min(driveSpeed, AutoRaceDriveMaxSpeed);
 
-            if (cornerSpeedLimit < driveSpeed)
-                driveSpeed = Math.Max(cornerSpeedLimit, AutoRaceDriveCornerMinSpeed);
+                if (cornerSpeedLimit < driveSpeed)
+                    driveSpeed = Math.Max(cornerSpeedLimit, AutoRaceDriveCornerMinSpeed);
+            }
+            else if (cornerSpeedLimit < driveSpeed)
+            {
+                // Natural Mode leaves straight-line speed to the car/game and only
+                // applies a smooth reduction for upcoming corners.
+                var naturalBrakeRate = Math.Max(12F, AutoRaceDriveAdaptiveBrake * 42F);
+                driveSpeed = Math.Max(cornerSpeedLimit, driveSpeed - naturalBrakeRate * (float)deltaSeconds);
+            }
 
             float headingX, headingZ;
             if (speed > 0.75F)
@@ -36057,13 +36071,16 @@ namespace ForzaHorizon6AutoshowUnlocker
             var headingDot = (headingX * desiredX) + (headingZ * desiredZ);
             if (speed > 0.75F && headingDot < AutoRaceDriveBehindDot)
             {
-                desiredX = headingX;
-                desiredZ = headingZ;
+                // Never preserve a backwards velocity vector. At high speed that
+                // old behavior could keep the car driving backwards indefinitely.
+                headingX = desiredX;
+                headingZ = desiredZ;
                 headingDot = 1F;
             }
 
             var turnBoost = headingDot < 0.15F ? 1.65F : headingDot < 0.55F ? 1.25F : 1F;
-            var maxTurn = AutoRaceDriveTurnRate * turnBoost * (float)deltaSeconds;
+            var highSpeedFactor = Math.Min(3.5F, Math.Max(1F, speed / 90F));
+            var maxTurn = AutoRaceDriveTurnRate * turnBoost * highSpeedFactor * (float)deltaSeconds;
             RotateHeadingTowards(ref headingX, ref headingZ, desiredX, desiredZ, maxTurn);
 
             var newVx = headingX * driveSpeed;
