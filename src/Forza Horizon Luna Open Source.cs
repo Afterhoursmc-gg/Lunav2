@@ -36071,6 +36071,11 @@ namespace ForzaHorizon6AutoshowUnlocker
             if (!IsFiniteFloat(newVx) || !IsFiniteFloat(newVz))
                 return;
 
+            // Keep the vehicle nose aligned with the direction Auto Race is driving.
+            // Without this, the velocity vector can point along the route while the
+            // vehicle body keeps its previous yaw, which causes reverse/sideways driving.
+            LockFlyVehicleFlat(vehiclePointer, headingX, headingZ);
+
             Buffer.BlockCopy(BitConverter.GetBytes(newVx), 0, velocity, 0, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(newVz), 0, velocity, 8, 4);
             WriteBytes(vehiclePointer + 0x20UL, velocity);
