@@ -8782,6 +8782,7 @@ namespace ForzaHorizon6AutoshowUnlocker
             db.AutoRaceDriveMaxSpeed = Math.Max(db.AutoRaceDriveCruiseSpeed, topKmh / 3.6F);
             db.AutoRaceDriveAccelPerSecond = Math.Max(1F, accel * accelMultiplier);
             db.AutoRaceDriveTurnRate = Math.Max(0.1F, steer);
+            db.AutoRaceDriveAdaptiveBrake = Math.Max(0F, _autoRaceDriveAdaptiveBrake);
             db.AutoRaceDriveNaturalMode = _autoRaceDriveNaturalMode;
             db.AutoRaceDriveScanIntervalMs = _autoRaceDriveScanEnabled ? _autoRaceDriveScanIntervalMs : DefaultAutoRaceDriveScanMs;
             db.AutoRaceDriveOffWaypointMeters = _autoRaceDriveOffWaypointEnabled ? Math.Max(0F, _autoRaceDriveOffWaypointMeters) : 0F;
@@ -27784,6 +27785,7 @@ namespace ForzaHorizon6AutoshowUnlocker
         internal float AutoRaceDriveAccelPerSecond = 130F;
         internal float AutoRaceDriveMaxSpeed = 170F;
         internal float AutoRaceDriveTurnRate = 4.6F;
+        internal float AutoRaceDriveAdaptiveBrake = 0.92F;
         internal bool AutoRaceDriveNaturalMode;
         internal float AutoRaceDriveOffWaypointMeters = 0F;
         internal int AutoRaceDriveScanIntervalMs = 50;
