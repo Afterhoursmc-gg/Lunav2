@@ -1,0 +1,45 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build EXE
+        shell: pwsh
+        run: .\Build.ps1
+
+      - name: Verify release output
+        shell: pwsh
+        run: |
+          $exe = Join-Path $PWD 'Release\Forza Horizon Luna Open Source.exe'
+          if (-not (Test-Path -LiteralPath $exe)) {
+            throw "Expected EXE was not produced: $exe"
+          }
+          $item = Get-Item -LiteralPath $exe
+          if ($item.Length -lt 100KB) {
+            throw "Produced EXE is unexpectedly small: $($item.Length) bytes"
+          }
+          Write-Host "Built $($item.FullName) ($($item.Length) bytes)"
+
+      - name: Package release
+        shell: pwsh
+        run: Compress-Archive -Path Release\* -DestinationPath Lunav2-Windows-x64.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lunav2-Windows-x64
+          path: Lunav2-Windows-x64.zip
+          if-no-files-found: error
