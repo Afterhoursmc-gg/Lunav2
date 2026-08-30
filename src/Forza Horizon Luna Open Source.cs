@@ -36050,12 +36050,18 @@ namespace ForzaHorizon6AutoshowUnlocker
                 if (cornerSpeedLimit < driveSpeed)
                     driveSpeed = Math.Max(cornerSpeedLimit, AutoRaceDriveCornerMinSpeed);
             }
-            else if (cornerSpeedLimit < driveSpeed)
+            else
             {
-                // Natural Mode leaves straight-line speed to the car/game and only
-                // applies a smooth reduction for upcoming corners.
-                var naturalBrakeRate = Math.Max(12F, AutoRaceDriveAdaptiveBrake * 42F);
-                driveSpeed = Math.Max(cornerSpeedLimit, driveSpeed - naturalBrakeRate * (float)deltaSeconds);
+                // Natural Mode ignores the generic cruise target and ramps toward
+                // the configured vehicle-specific top-speed ceiling instead.
+                var naturalRamp = Math.Max(speed, AutoRaceDriveMinSpeed) + (AutoRaceDriveAccelPerSecond * (float)deltaSeconds);
+                driveSpeed = Math.Min(naturalRamp, AutoRaceDriveMaxSpeed);
+                driveSpeed = Math.Max(driveSpeed, speed);
+                if (cornerSpeedLimit < driveSpeed)
+                {
+                    var naturalBrakeRate = Math.Max(12F, AutoRaceDriveAdaptiveBrake * 42F);
+                    driveSpeed = Math.Max(cornerSpeedLimit, driveSpeed - naturalBrakeRate * (float)deltaSeconds);
+                }
             }
 
             float headingX, headingZ;

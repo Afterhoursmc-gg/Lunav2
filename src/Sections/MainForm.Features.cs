@@ -2297,7 +2297,7 @@ namespace ForzaHorizon6AutoshowUnlocker
                 dialog.Controls.Add(noWater);
 
                 var natural = new CheckBox();
-                natural.Text = "Natural Mode (use the car's own speed/physics)";
+                natural.Text = "Natural Mode (ramp to Top speed; Cruise speed is ignored)";
                 natural.Checked = _autoRaceDriveNaturalMode;
                 natural.Location = new Point(18, 500);
                 natural.Size = new Size(524, 24);
